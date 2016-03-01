@@ -18,7 +18,7 @@ class PrintProgress(object):
         print('Iter {}: {}'.format(iter, error))
         sys.stdout.flush()
 
-    def update(self, iteration, samples, acceptances):
+    def update(self, iteration, acceptances):
         update_frequency = self.update_frequency
 
         now = time.time()
