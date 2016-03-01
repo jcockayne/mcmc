@@ -58,7 +58,7 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
 
     for i in xrange(iterations):
         if adapt_frequency is not None and i > 0 and i % adapt_frequency == 0:
-            propose = adapt_function(propose, kappas[:i, :], acceptances[:i])
+            propose = adapt_function(propose, kappas, acceptances)
 
         new_kappa = propose(cur_kappa)
         new_phi = as_single_number(phi(new_kappa))
@@ -76,6 +76,6 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
         kappas[i, :] = cur_kappa.ravel()
         acceptances[i] = accept
 
-        progress_object.update(i, kappas[:(i+1)], acceptances[:(i+1)])
+        progress_object.update(i, kappas, acceptances)
     progress_object.update(iterations, kappas, acceptances)
     return kappas
