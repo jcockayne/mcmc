@@ -76,6 +76,6 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
         kappas[i, :] = cur_kappa.ravel()
         acceptances[i] = accept
 
-        progress_object.update(i, kappas, acceptances)
-    progress_object.update(iterations, kappas, acceptances)
+        progress_object.update(i, acceptances[:i])
+    progress_object.update(iterations, acceptances[:i])
     return kappas
