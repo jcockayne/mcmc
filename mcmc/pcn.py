@@ -38,15 +38,16 @@ def adapt_function(adapt_frequency, min_accept, max_accept, factor, verbosity=1)
     return __do_adaptation
 
 
-def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=None, progress_object=None):
+def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=None, progress_object=None, kappas=None):
     if progress_object is None:
         progress_object = progress.get_default_progress()
 
     if adapt_frequency is not None and adapt_function is None:
         raise Exception('Adapt frequency supplied but no adapt function specified.')
 
-    # now the MCMC
-    kappas = np.empty((iterations, kappa_0.shape[0]))
+    # create an empty numpy if the array is not supplied
+    if kappas is None:
+        kappas = np.empty((iterations, kappa_0.shape[0]))
 
     acceptances = np.empty(iterations, dtype=np.bool)
 
