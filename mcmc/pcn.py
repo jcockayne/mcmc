@@ -3,7 +3,7 @@ import numpy as np
 import time, sys
 import progress
 from utilities import as_single_number
-
+import storage as st
 
 class PCNProposal(object):
     def __init__(self, beta, covariance_matrix):
@@ -38,7 +38,7 @@ def adapt_function(adapt_frequency, min_accept, max_accept, factor, verbosity=1)
     return __do_adaptation
 
 
-def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=None, progress_object=None, kappas=None):
+def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=None, progress_object=None, storage=None):
     if progress_object is None:
         progress_object = progress.get_default_progress()
 
@@ -46,8 +46,9 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
         raise Exception('Adapt frequency supplied but no adapt function specified.')
 
     # create an empty numpy if the array is not supplied
-    if kappas is None:
-        kappas = np.empty((iterations, kappa_0.shape[0]))
+    return_array = storage is None
+    if storage is None:
+        storage = st.DiskBackedStorage((iterations, kappa_0.shape[0]))
 
     acceptances = np.empty(iterations, dtype=np.bool)
 
@@ -58,7 +59,7 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
 
     for i in xrange(iterations):
         if adapt_frequency is not None and i > 0 and i % adapt_frequency == 0:
-            propose = adapt_function(propose, kappas, acceptances)
+            propose = adapt_function(propose, storage, acceptances)
 
         new_kappa = propose(cur_kappa)
         new_phi = as_single_number(phi(new_kappa))
@@ -73,9 +74,11 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
             cur_kappa = new_kappa
             cur_phi = new_phi
 
-        kappas[i, :] = cur_kappa.ravel()
+        storage.set_item(i, cur_kappa.ravel())
         acceptances[i] = accept
 
         progress_object.update(i, acceptances[:i])
     progress_object.update(iterations, acceptances[:i])
-    return kappas
+    if return_array:
+        return storage.array
+    return storage
