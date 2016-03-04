@@ -7,7 +7,7 @@ def rwm(iterations, propose, log_likelihood, log_prior, init_theta, progress_obj
     if progress_object is None:
         progress_object = progress.get_default_progress()
 
-    if type(init_theta) is np.array:
+    if type(init_theta) is np.ndarray:
         theta_shape = init_theta.shape[0]
     else:
         theta_shape = 1
@@ -22,18 +22,23 @@ def rwm(iterations, propose, log_likelihood, log_prior, init_theta, progress_obj
 
     for i in xrange(iterations):
         new_theta = propose(cur_theta)
-        new_log_likelihood = as_single_number(log_likelihood(new_theta))
         new_log_prior = as_single_number(log_prior(new_theta))
 
-        if np.isnan(new_log_likelihood):
-            progress_object.report_error(i, 'Proposal is about to be rejected because likelihood is NaN')
-            accept = False
-        elif np.isnan(new_log_prior):
-            progress_object.report_error(i, 'Proposal is about to be rejected because prior is NaN')
+        if np.isinf(new_log_prior) and new_log_prior < 0:
             accept = False
         else:
-            alpha = min(1, np.exp(new_log_likelihood + new_log_prior - cur_log_likelihood - cur_log_prior))
-            accept = np.random.uniform() < alpha
+            new_log_likelihood = log_likelihood(new_theta)
+            new_log_likelihood = as_single_number(new_log_likelihood)
+
+            if np.isnan(new_log_likelihood):
+                progress_object.report_error(i, 'Proposal is about to be rejected because likelihood is NaN')
+                accept = False
+            elif np.isnan(new_log_prior):
+                progress_object.report_error(i, 'Proposal is about to be rejected because prior is NaN')
+                accept = False
+            else:
+                alpha = min(1, np.exp(new_log_likelihood + new_log_prior - cur_log_likelihood - cur_log_prior))
+                accept = np.random.uniform() < alpha
 
         if accept:
             cur_theta = new_theta
@@ -41,6 +46,6 @@ def rwm(iterations, propose, log_likelihood, log_prior, init_theta, progress_obj
         samples[i, :] = cur_theta
         acceptances[i] = accept
 
-        progress_object.update(i, samples[:(i+1)], acceptances[:(i+1)])
-    progress_object.update(iterations, samples, acceptances)
+        progress_object.update(i, acceptances[:(i+1)])
+    progress_object.update(iterations, acceptances)
     return samples
