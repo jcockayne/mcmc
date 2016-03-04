@@ -43,6 +43,7 @@ class JupyterProgress(object):
         self.__error_field__.value += 'Iteration {}: {}\n'.format(iter, error)
 
     def update(self, iteration, acceptances):
+
         recent_acceptance_lag = self.recent_acceptance_lag
 
         delta_accept = acceptances[-recent_acceptance_lag:].mean()*100 if iteration > recent_acceptance_lag else np.nan
@@ -52,7 +53,7 @@ class JupyterProgress(object):
 
         now = time.time()
         toc = now - self.last_update_time
-        do_update = toc > update_frequency_seconds
+        do_update = toc > update_frequency_seconds and iteration > self.last_update_iteration
 
         if do_update or iteration == self.n_iter:
             new_iterations = iteration - self.last_update_iteration
