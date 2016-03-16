@@ -48,7 +48,7 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
     # create an empty numpy if the array is not supplied
     return_array = storage is None
     if storage is None:
-        storage = st.DiskBackedStorage((iterations, kappa_0.shape[0]))
+        storage = st.ArrayStorage((iterations, kappa_0.shape[0]))
 
     acceptances = np.empty(iterations, dtype=np.bool)
 
@@ -74,11 +74,11 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
             cur_kappa = new_kappa
             cur_phi = new_phi
 
-        storage.set_item(i, cur_kappa.ravel())
+        storage.add_sample(cur_kappa.ravel())
         acceptances[i] = accept
 
         progress_object.update(i, acceptances[:i])
-    progress_object.update(iterations, acceptances[:i])
+    progress_object.update(iterations, acceptances)
     if return_array:
         return storage.array
     return storage
