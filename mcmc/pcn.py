@@ -60,16 +60,20 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
     for i in xrange(iterations):
         if adapt_frequency is not None and i > 0 and i % adapt_frequency == 0:
             propose = adapt_function(propose, storage, acceptances)
+        try:
+            new_kappa = propose(cur_kappa)
+            new_phi = as_single_number(phi(new_kappa))
 
-        new_kappa = propose(cur_kappa)
-        new_phi = as_single_number(phi(new_kappa))
-
-        if np.isnan(new_phi):
-            progress_object.report_error(i, 'About to reject proposal because new value of phi is NaN.'.format(i))
+            if np.isnan(new_phi):
+                progress_object.report_error(i, 'About to reject proposal because new value of phi is NaN.'.format(i))
+                accept = False
+            else:
+                alpha = min(1, np.exp(cur_phi-new_phi))
+                accept = alpha > np.random.uniform()
+        except Exception as ex:
+            progress_object.report_error(i, ex)
             accept = False
-        else:
-            alpha = min(1, np.exp(cur_phi-new_phi))
-            accept = alpha > np.random.uniform()
+
         if accept:
             cur_kappa = new_kappa
             cur_phi = new_phi
