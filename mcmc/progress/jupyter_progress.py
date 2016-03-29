@@ -16,6 +16,7 @@ class JupyterProgress(object):
         self.recent_acceptance_lag = recent_acceptance_lag
         self.last_update_iteration = 0
         self.n_iter = None
+        self.__total_errors__ = 0
 
         self.__iter_time_buffer__ = RingBuffer(100)
 
@@ -41,6 +42,7 @@ class JupyterProgress(object):
         if self.__error_field__ is None:
             self.initialise_errors()
         self.__error_field__.value += 'Iteration {}: {}\n'.format(iter, error)
+        self.__total_errors__ += 1
 
     def update(self, iteration, acceptances):
 
@@ -103,6 +105,16 @@ class JupyterProgress(object):
                                 <td>ETA</td>
                                 <td>{}</td>
                         </tr>
+                        <tr>
+                                <td>Errors</td>
+                                <td>{}</td>
+                        </tr>
                 </table>
         """
-        return template.format(iteration, self.recent_acceptance_lag, delta_accept, total_accept, time_per_iter, pretty_time_delta(eta))
+        return template.format(iteration,
+                               self.recent_acceptance_lag,
+                               delta_accept,
+                               total_accept,
+                               time_per_iter,
+                               pretty_time_delta(eta),
+                               self.__total_errors__)
