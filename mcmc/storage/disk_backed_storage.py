@@ -43,3 +43,9 @@ class DiskBackedStorage(object):
         self.__flush_to_disk__(self.__current_index__ + 1)
         self.__f__.close()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+        return False
