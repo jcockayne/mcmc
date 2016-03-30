@@ -17,9 +17,15 @@ class DiskBackedStorage(object):
 
         self.__current_index__ = 0
 
-        if os.path.exists(self.__disk_path__):
-            raise Exception('File {} already exists'.format(self.__disk_path__))
         self.__f__ = tables.open_file(self.__disk_path__, 'w')
+
+        # check whether samples already exist in the file
+        try:
+            self.__f__.get_node('/samples')
+            raise Exception('File already contains samples!')
+        except:
+            pass
+
         self.__dest_table__ = self.__f__.create_earray('/', 'samples', tables.Float64Atom(), (0, store_shape[1]))
 
     def add_sample(self, value):

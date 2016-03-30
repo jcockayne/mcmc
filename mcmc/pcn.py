@@ -84,5 +84,5 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
         progress_object.update(i, acceptances[:i])
     progress_object.update(iterations, acceptances)
     if return_array:
-        return storage.array
-    return storage
+        return storage.array, acceptances
+    return storage, acceptances
