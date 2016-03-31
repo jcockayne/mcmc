@@ -1,10 +1,8 @@
 import numpy as np
-import os
-
 
 
 class DiskBackedStorage(object):
-    def __init__(self, store_shape, disk_path):
+    def __init__(self, store_shape, file):
         try:
             import tables
         except:
@@ -13,11 +11,13 @@ class DiskBackedStorage(object):
         self.__store_shape__ = store_shape
         self.__array__ = np.empty(store_shape)
         self.__max_rows__ = store_shape[0]
-        self.__disk_path__ = disk_path
 
         self.__current_index__ = 0
 
-        self.__f__ = tables.open_file(self.__disk_path__, 'w')
+        if type(file) in (str, unicode):
+            self.__f__ = tables.open_file(file, 'a')
+        else:
+            self.__f__ = file
 
         # check whether samples already exist in the file
         try:
@@ -40,10 +40,6 @@ class DiskBackedStorage(object):
         self.__dest_table__.append(self.__array__[:up_to, :])
         # dangerous not to reassign but let's assume we're doing this right.
         # self.__array__ = np.empty(self.__store_shape__)
-
-    @property
-    def disk_path(self):
-        return self.__disk_path__
 
     def close(self):
         self.__flush_to_disk__(self.__current_index__ + 1)

@@ -1,9 +1,10 @@
 from __future__ import print_function
 import numpy as np
-import time, sys
 import progress
 from utilities import as_single_number
 import storage as st
+import logging
+logger = logging.getLogger(__name__)
 
 class PCNProposal(object):
     def __init__(self, beta, covariance_matrix):
@@ -58,6 +59,8 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
     progress_object.initialise(iterations)
 
     for i in xrange(iterations):
+        if i % 1000 == 0:
+            logger.info('Iteration {}'.format(i))
         if adapt_frequency is not None and i > 0 and i % adapt_frequency == 0:
             propose = adapt_function(propose, storage, acceptances)
         try:
