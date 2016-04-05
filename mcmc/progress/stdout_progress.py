@@ -2,6 +2,7 @@ from __future__ import print_function
 import time
 import sys
 import logging
+from time_utils import pretty_time_delta
 logger = logging.getLogger(__name__)
 
 class PrintProgress(object):
@@ -31,8 +32,13 @@ class PrintProgress(object):
         tot_accept = acceptances.mean()*100
 
         if self.verbosity == 1 and iteration % self.update_frequency == 0 and iteration > 0:
-            remaining = toc / update_frequency * (self.n_iter - iteration)
-            message = 'Iter {}: Accept ({:.0f}% {:.0f}%) T/Iter {:.4f} Remaining {}'.format(iteration, delta_accept, tot_accept, toc / update_frequency, remaining)
+            t_per_iter = toc * 1. / update_frequency
+            remaining = t_per_iter * (self.n_iter - iteration)
+            message = 'Iter {}: Accept ({:.0f}% {:.0f}%) T/Iter {:.4f} Remaining {}'.format(iteration,
+                                                                                            delta_accept,
+                                                                                            tot_accept,
+                                                                                            pretty_time_delta(t_per_iter),
+                                                                                            pretty_time_delta(remaining))
             print(message)
             sys.stdout.flush()
             logger.info(message)
