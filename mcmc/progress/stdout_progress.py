@@ -15,6 +15,7 @@ class PrintProgress(object):
     def initialise(self, n_iter):
         self.n_iter = n_iter
         self.start_time = self.last_update_time = time.time()
+        self.last_update_time = time.time()
 
     def report_error(self, iter, error):
         print('Iter {}: {}'.format(iter, error))
@@ -23,9 +24,8 @@ class PrintProgress(object):
     def update(self, iteration, acceptances):
         update_frequency = self.update_frequency
 
-        now = time.time()
-        toc = time.time() - now
-        self.last_update_time = now
+        toc = time.time() - self.last_update_time
+        self.last_update_time = time.time()
 
         delta_accept = acceptances[-update_frequency:].mean()*100
         tot_accept = acceptances.mean()*100
