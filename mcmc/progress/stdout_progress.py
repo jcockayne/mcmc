@@ -23,15 +23,14 @@ class PrintProgress(object):
         sys.stdout.flush()
 
     def update(self, iteration, acceptances):
-        update_frequency = self.update_frequency
-
-        toc = time.time() - self.last_update_time
-        self.last_update_time = time.time()
-
-        delta_accept = acceptances[-update_frequency:].mean()*100
-        tot_accept = acceptances.mean()*100
-
         if self.verbosity == 1 and iteration % self.update_frequency == 0 and iteration > 0:
+            update_frequency = self.update_frequency
+
+            toc = time.time() - self.last_update_time
+            self.last_update_time = time.time()
+
+            delta_accept = acceptances[-update_frequency:].mean()*100
+            tot_accept = acceptances.mean()*100
             t_per_iter = toc * 1. / update_frequency
             remaining = t_per_iter * (self.n_iter - iteration)
             message = 'Iter {}: Accept ({:.0f}% {:.0f}%) T/Iter {} Remaining {}'.format(iteration,
