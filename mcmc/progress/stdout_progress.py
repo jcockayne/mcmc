@@ -1,6 +1,8 @@
+from __future__ import print_function
 import time
 import sys
-
+import logging
+logger = logging.getLogger(__name__)
 
 class PrintProgress(object):
     def __init__(self, update_frequency=None, verbosity=1):
@@ -29,5 +31,7 @@ class PrintProgress(object):
         tot_accept = acceptances.mean()*100
 
         if self.verbosity == 1 and iteration % self.update_frequency == 0 and iteration > 0:
-            print('Iter {}: Accept ({:.0f}% {:.0f}%) T/Iter {:.4f}'.format(iteration, delta_accept, tot_accept, toc / update_frequency))
+            message = 'Iter {}: Accept ({:.0f}% {:.0f}%) T/Iter {:.4f}'.format(iteration, delta_accept, tot_accept, toc / update_frequency)
+            print(message)
             sys.stdout.flush()
+            logger.info(message)
