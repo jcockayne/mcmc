@@ -34,7 +34,7 @@ class PrintProgress(object):
         if self.verbosity == 1 and iteration % self.update_frequency == 0 and iteration > 0:
             t_per_iter = toc * 1. / update_frequency
             remaining = t_per_iter * (self.n_iter - iteration)
-            message = 'Iter {}: Accept ({:.0f}% {:.0f}%) T/Iter {:.4f} Remaining {}'.format(iteration,
+            message = 'Iter {}: Accept ({:.0f}% {:.0f}%) T/Iter {} Remaining {}'.format(iteration,
                                                                                             delta_accept,
                                                                                             tot_accept,
                                                                                             pretty_time_delta(t_per_iter),
