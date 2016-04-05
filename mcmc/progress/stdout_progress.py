@@ -5,16 +5,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 class PrintProgress(object):
-    def __init__(self, update_frequency=None, verbosity=1):
+    def __init__(self, update_frequency=1000, verbosity=1):
         self.start_time = None
         self.last_update_time = None
+        self.n_iter = None
         self.verbosity = verbosity
         self.update_frequency = update_frequency
 
     def initialise(self, n_iter):
+        self.n_iter = n_iter
         self.start_time = self.last_update_time = time.time()
-        if self.update_frequency is None:
-            self.update_frequency = int(n_iter / 100)
 
     def report_error(self, iter, error):
         print('Iter {}: {}'.format(iter, error))
@@ -31,7 +31,8 @@ class PrintProgress(object):
         tot_accept = acceptances.mean()*100
 
         if self.verbosity == 1 and iteration % self.update_frequency == 0 and iteration > 0:
-            message = 'Iter {}: Accept ({:.0f}% {:.0f}%) T/Iter {:.4f}'.format(iteration, delta_accept, tot_accept, toc / update_frequency)
+            remaining = toc / update_frequency * (self.n_iter - iteration)
+            message = 'Iter {}: Accept ({:.0f}% {:.0f}%) T/Iter {:.4f} Remaining {}'.format(iteration, delta_accept, tot_accept, toc / update_frequency, remaining)
             print(message)
             sys.stdout.flush()
             logger.info(message)

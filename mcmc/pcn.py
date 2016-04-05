@@ -59,8 +59,6 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
     progress_object.initialise(iterations)
 
     for i in xrange(iterations):
-        if i % 1000 == 0:
-            logger.info('Iteration {}'.format(i))
         if adapt_frequency is not None and i > 0 and i % adapt_frequency == 0:
             propose = adapt_function(propose, storage, acceptances)
         try:
