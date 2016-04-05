@@ -33,10 +33,10 @@ class PrintProgress(object):
             tot_accept = acceptances.mean()*100
             t_per_iter = toc * 1. / update_frequency
             remaining = t_per_iter * (self.n_iter - iteration)
-            message = 'Iter {}: Accept ({:.0f}% {:.0f}%) T/Iter {} Remaining {}'.format(iteration,
+            message = 'Iter {}: Accept ({:.0f}% {:.0f}%) T/Iter {:.4f}s Remaining {}'.format(iteration,
                                                                                             delta_accept,
                                                                                             tot_accept,
-                                                                                            pretty_time_delta(t_per_iter),
+                                                                                            t_per_iter,
                                                                                             pretty_time_delta(remaining))
             print(message)
             sys.stdout.flush()
