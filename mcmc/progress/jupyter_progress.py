@@ -45,6 +45,8 @@ class JupyterProgress(object):
         self.__total_errors__ += 1
 
     def update(self, iteration, acceptances):
+        if self.n_iter is None:
+            raise Exception('First pass in the number of iterations!')
 
         recent_acceptance_lag = self.recent_acceptance_lag
 

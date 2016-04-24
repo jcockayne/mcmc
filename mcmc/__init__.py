@@ -2,6 +2,7 @@ import progress
 from pcn import pCN
 from rwm import rwm
 from mala import mala
+from hmc import hmc
 
 def load_ipython_extension(shell):
     # The `ipython` argument is the currently active `InteractiveShell`
