@@ -27,18 +27,22 @@ def rwm(iterations, propose, log_likelihood, log_prior, init_theta, progress_obj
         if np.isinf(new_log_prior) and new_log_prior < 0:
             accept = False
         else:
-            new_log_likelihood = log_likelihood(new_theta)
-            new_log_likelihood = as_single_number(new_log_likelihood)
+            try:
+                new_log_likelihood = log_likelihood(new_theta)
+                new_log_likelihood = as_single_number(new_log_likelihood)
 
-            if np.isnan(new_log_likelihood):
-                progress_object.report_error(i, 'Proposal is about to be rejected because likelihood is NaN')
+                if np.isnan(new_log_likelihood):
+                    progress_object.report_error(i, 'Proposal is about to be rejected because likelihood is NaN')
+                    accept = False
+                elif np.isnan(new_log_prior):
+                    progress_object.report_error(i, 'Proposal is about to be rejected because prior is NaN')
+                    accept = False
+                else:
+                    alpha = min(1, np.exp(new_log_likelihood + new_log_prior - cur_log_likelihood - cur_log_prior))
+                    accept = np.random.uniform() < alpha
+            except Exception as ex:
                 accept = False
-            elif np.isnan(new_log_prior):
-                progress_object.report_error(i, 'Proposal is about to be rejected because prior is NaN')
-                accept = False
-            else:
-                alpha = min(1, np.exp(new_log_likelihood + new_log_prior - cur_log_likelihood - cur_log_prior))
-                accept = np.random.uniform() < alpha
+                progress_object.report_error(i, ex)
 
         if accept:
             cur_theta = new_theta
