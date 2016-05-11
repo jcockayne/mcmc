@@ -1,22 +1,46 @@
 from __future__ import print_function
 import numpy as np
+
 import progress
 from utilities import as_single_number
 import storage as st
 import logging
 logger = logging.getLogger(__name__)
+import scipy
 
 class PCNProposal(object):
     def __init__(self, beta, covariance_matrix):
         self.beta = beta
-        (u, s, v) = np.linalg.svd(covariance_matrix)
-        self.__dot_with_xi = np.sqrt(s)[:, None] * v
+        #(u, s, v) = np.linalg.svd(covariance_matrix)
+        #self.__dot_with_xi = np.sqrt(s)[:, None] * v
+        self.__dot_with_xi = scipy.linalg.sqrtm(covariance_matrix)
 
     def __call__(self, current):
-        xi = np.dot(np.random.normal(size=len(current)), self.__dot_with_xi)
-        xi = xi.reshape(current.shape)
+        xi = np.dot(self.__dot_with_xi, np.random.normal(size=current.shape))
         new = np.sqrt(1-self.beta**2)*current + self.beta*xi
         return new
+
+class InfinityMalaProposal(object):
+    def __init__(self, grad_phi, covariance_matrix, dt):
+        #(u, s, v) = np.linalg.svd(covariance_matrix)
+        #self.__sqrtm = np.sqrt(s)[:,None] * v
+        self.__sqrtm = scipy.linalg.sqrtm(covariance_matrix)
+        self.__covariance_matrix = covariance_matrix
+        self.__dt = dt
+        self.__grad_phi = grad_phi
+
+        mat = covariance_matrix + 0.5*dt*np.eye(covariance_matrix.shape[0])
+        term_a = np.linalg.inv(mat)
+        term_b = covariance_matrix - 0.5*dt*np.eye(covariance_matrix.shape[0])
+        self.__A_theta = term_a.dot(term_b)
+
+        self.__B_theta = np.sqrt(2*dt)*term_a.dot(self.__sqrtm)
+
+    def __call__(self, current):
+        xi = np.dot(np.random.normal(size=len(current)), self.__sqrtm)
+        gradient = self.__grad_phi(current)
+        h = -np.sqrt(self.__dt/2.)*gradient
+        return self.__A_theta.dot(current) + self.__B_theta.dot(xi + self.__sqrtm.dot(h))
 
 
 def proposal(beta, covariance_matrix):
@@ -49,7 +73,7 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
     # create an empty numpy if the array is not supplied
     return_array = storage is None
     if storage is None:
-        storage = st.ArrayStorage((iterations, kappa_0.shape[0]))
+        storage = st.ArrayStorage(iterations, kappa_0.shape[0])
 
     acceptances = np.empty(iterations, dtype=np.bool)
 
