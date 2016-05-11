@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 
 
 class ArrayStorage(object):
-    def __init__(self, total_samples, variates , thin=1):
+    def __init__(self, total_samples, variates, thin=1):
         self.__array__ = np.empty((int(total_samples / thin), variates))
         self.__current_index__ = 0
         self.__real_index__ = 0
