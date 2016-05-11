@@ -3,9 +3,40 @@ from utilities import as_single_number
 import progress
 
 
+def mala_proposal(grad_pi, sigma):
+    def __proposal(theta):
+        return theta + sigma * np.random.normal(size=theta.shape) + sigma**2 / 2. * grad_pi(theta)
+    return __proposal
+
+
+class AdaptiveProposal(object):
+    def __init__(self, initial_variance, adapt_rate=100, adapt_factor=2.0, adapt_limits=(0.2,0.5)):
+        self.adapt_rate = adapt_rate
+        self.adapt_factor = adapt_factor
+        self.adapt_limits = adapt_limits
+        self.variance = initial_variance
+        self.accepts = 0
+
+    def __call__(self, param):
+        return np.random.normal(param, self.variance)
+
+    def adapt(self, iteration, accepted):
+        self.accepts += accepted
+
+        if iteration > 0 and iteration % self.adapt_rate == 0:
+            accept_rate = self.accepts * 1. / self.adapt_rate
+            if self.adapt_limits[0] > accept_rate:
+                self.variance /= self.adapt_factor
+            if self.adapt_limits[1] < accept_rate:
+                self.variance *= self.adapt_factor
+            self.accepts = 0
+
+
 def rwm(iterations, propose, log_likelihood, log_prior, init_theta, progress_object=None):
     if progress_object is None:
         progress_object = progress.get_default_progress()
+
+    adapt = hasattr(propose, 'adapt')
 
     if type(init_theta) is np.ndarray:
         theta_shape = init_theta.shape[0]
@@ -49,6 +80,9 @@ def rwm(iterations, propose, log_likelihood, log_prior, init_theta, progress_obj
             cur_log_likelihood = new_log_likelihood
         samples[i, :] = cur_theta
         acceptances[i] = accept
+
+        if adapt:
+            propose.adapt(i, accept)
 
         progress_object.update(i, acceptances[:(i+1)])
     progress_object.update(iterations, acceptances)
