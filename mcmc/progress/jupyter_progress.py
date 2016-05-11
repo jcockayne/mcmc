@@ -20,7 +20,6 @@ class JupyterProgress(object):
 
         self.__iter_time_buffer__ = RingBuffer(100)
 
-        self.__progress_field__ = ipywidgets.IntProgress()
         self.__text_field__ = ipywidgets.HTML()
         self.__error_field__ = None
         self.__error_label__ = None
@@ -32,10 +31,8 @@ class JupyterProgress(object):
         if self.recent_acceptance_lag is None:
             self.recent_acceptance_lag = min(int(n_iter * 1. / 100), max_accept_lag)
 
-        self.__progress_field__.max = n_iter
-        self.__progress_field__.value = 0
         self.__text_field__.value = '<i>Waiting for {} iterations to have passed...</i>'.format(self.recent_acceptance_lag)
-        display(self.__progress_field__)
+        #display(self.__progress_field__)
         display(self.__text_field__)
 
     def report_error(self, iter, error):
@@ -50,16 +47,15 @@ class JupyterProgress(object):
 
         recent_acceptance_lag = self.recent_acceptance_lag
 
-        delta_accept = acceptances[-recent_acceptance_lag:].mean()*100 if iteration > recent_acceptance_lag else np.nan
-        tot_accept = acceptances.mean()*100
-
-        self.__progress_field__.value = iteration
-
         now = time.time()
         toc = now - self.last_update_time
         do_update = toc > update_frequency_seconds and iteration > self.last_update_iteration
 
         if do_update or iteration == self.n_iter:
+
+            delta_accept = acceptances[-recent_acceptance_lag:].mean()*100 if iteration > recent_acceptance_lag else np.nan
+            tot_accept = acceptances.mean()*100
+            
             new_iterations = iteration - self.last_update_iteration
             time_per_iter = toc * 1./new_iterations
             self.__iter_time_buffer__.append(time_per_iter)
@@ -72,7 +68,7 @@ class JupyterProgress(object):
 
             eta = (self.n_iter - iteration) * time_per_iter
 
-            html = self.get_text_field(iteration, delta_accept, tot_accept, time_per_iter, eta)
+            html = self.get_text_field(iteration, self.n_iter, delta_accept, tot_accept, time_per_iter, eta)
             self.__text_field__.value = html
 
             self.last_update_time = now
@@ -84,8 +80,14 @@ class JupyterProgress(object):
         display(self.__error_label__)
         display(self.__error_field__)
 
-    def get_text_field(self, iteration, delta_accept, total_accept, time_per_iter, eta):
+    def get_text_field(self, iteration, n_iter, delta_accept, total_accept, time_per_iter, eta):
         template = """
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" aria-valuenow="{}"
+                  aria-valuemin="0" aria-valuemax="{}" style="width:{:.2f}%">
+                    <span class="sr-only">{:.2f}% Complete</span>
+                  </div>
+                </div>
                 <table class="table">
                         <tr>
                                 <td>Current iteration</td>
@@ -114,6 +116,10 @@ class JupyterProgress(object):
                 </table>
         """
         return template.format(iteration,
+                               n_iter,
+                               iteration*100./n_iter,
+                               iteration*100./n_iter,
+                               iteration,
                                self.recent_acceptance_lag,
                                delta_accept,
                                total_accept,

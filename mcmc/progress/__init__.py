@@ -1,5 +1,5 @@
 notebook = False
-
+import jupyter_progress, stdout_progress
 
 def get_default_progress():
     if notebook:
