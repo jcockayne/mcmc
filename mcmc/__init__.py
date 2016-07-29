@@ -11,5 +11,10 @@ def load_ipython_extension(shell):
 
 
 def mcmc(line):
-    if line == 'notebook':
+    commands = line.split(' ')
+    if 'notebook' in commands:
         progress.notebook = True
+    if 'quiet' in commands:
+        progress.quiet = True
+    if 'verbose' in commands:
+        progress.quiet = False
