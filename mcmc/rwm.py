@@ -78,6 +78,7 @@ def rwm(iterations, propose, log_likelihood, log_prior, init_theta, progress_obj
         if accept:
             cur_theta = new_theta
             cur_log_likelihood = new_log_likelihood
+            cur_log_prior = new_log_prior
         samples[i, :] = cur_theta
         acceptances[i] = accept
 
@@ -86,4 +87,4 @@ def rwm(iterations, propose, log_likelihood, log_prior, init_theta, progress_obj
 
         progress_object.update(i, acceptances[:(i+1)])
     progress_object.update(iterations, acceptances)
-    return samples
+    return samples, acceptances
