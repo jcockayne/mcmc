@@ -3,8 +3,7 @@ import progress
 
 
 def hmc(iterations, log_pi, epsilon, L, q_0, grad_log_pi=None, progress_object=None):
-    if progress_object is None:
-        progress_object = progress.get_default_progress()
+    progress_object = progress.factory(progress_object)
     if grad_log_pi is None:
         try:
             import autograd

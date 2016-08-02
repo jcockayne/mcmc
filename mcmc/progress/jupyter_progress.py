@@ -4,11 +4,12 @@ from IPython.display import display
 import numpy as np
 from ring_buffer import RingBuffer
 from time_utils import pretty_time_delta
+import base
 
 update_frequency_seconds = 0.1
 max_accept_lag = 1000
 
-class JupyterProgress(object):
+class JupyterProgress(base.ProgressBase):
     def __init__(self, recent_acceptance_lag=None, verbosity=1):
         self.start_time = None
         self.last_update_time = None
@@ -37,7 +38,7 @@ class JupyterProgress(object):
 
     def report_error(self, iter, error):
         if self.__error_field__ is None:
-            self.initialise_errors()
+            self.__initialise_errors__()
         if self.verbosity > 0:
             self.__error_field__.value += 'Iteration {}: {}\n'.format(iter, error)
         self.__total_errors__ += 1
@@ -69,20 +70,20 @@ class JupyterProgress(object):
 
             eta = (self.n_iter - iteration) * time_per_iter
 
-            html = self.get_text_field(iteration, self.n_iter, delta_accept, tot_accept, time_per_iter, eta)
+            html = self.__get_text_field__(iteration, self.n_iter, delta_accept, tot_accept, time_per_iter, eta)
             self.__text_field__.value = html
 
             self.last_update_time = now
             self.last_update_iteration = iteration
 
-    def initialise_errors(self):
+    def __initialise_errors__(self):
         if self.verbosity > 0:
             self.__error_label__ = ipywidgets.HTML(value="<span style='color: red'>Errors:</span>")
             self.__error_field__ = ipywidgets.Textarea(disabled=True)
             display(self.__error_label__)
             display(self.__error_field__)
 
-    def get_text_field(self, iteration, n_iter, delta_accept, total_accept, time_per_iter, eta):
+    def __get_text_field__(self, iteration, n_iter, delta_accept, total_accept, time_per_iter, eta):
         template = """
                 <div class="progress">
                   <div class="progress-bar" role="progressbar" aria-valuenow="{}"

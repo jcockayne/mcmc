@@ -33,8 +33,7 @@ class AdaptiveProposal(object):
 
 
 def rwm(iterations, propose, log_likelihood, log_prior, init_theta, progress_object=None):
-    if progress_object is None:
-        progress_object = progress.get_default_progress()
+    progress_object = progress.factory(progress_object)
 
     adapt = hasattr(propose, 'adapt')
 

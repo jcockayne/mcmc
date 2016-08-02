@@ -16,6 +16,6 @@ def mcmc(line):
     if 'notebook' in commands:
         progress.notebook = True
     if 'quiet' in commands:
-        progress.quiet = True
+        progress.verbose = False
     if 'verbose' in commands:
-        progress.quiet = False
+        progress.verbose = True

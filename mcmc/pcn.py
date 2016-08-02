@@ -64,8 +64,7 @@ def adapt_function(adapt_frequency, min_accept, max_accept, factor, verbosity=1)
 
 
 def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=None, progress_object=None, storage=None):
-    if progress_object is None:
-        progress_object = progress.get_default_progress()
+    progress_object = progress.factory(progress_object)
 
     if adapt_frequency is not None and adapt_function is None:
         raise Exception('Adapt frequency supplied but no adapt function specified.')

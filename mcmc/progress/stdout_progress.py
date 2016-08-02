@@ -2,10 +2,12 @@ from __future__ import print_function
 import time
 import sys
 import logging
+import base
+
 from time_utils import pretty_time_delta
 logger = logging.getLogger(__name__)
 
-class PrintProgress(object):
+class PrintProgress(base.ProgressBase):
     def __init__(self, update_frequency=1000, verbosity=1):
         self.start_time = None
         self.last_update_time = None
