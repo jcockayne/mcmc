@@ -2,6 +2,7 @@ import progress
 from pcn import pCN
 from rwm import rwm
 from hmc import hmc
+from gibbs import gibbs, GibbsProposal
 
 def load_ipython_extension(shell):
     # The `ipython` argument is the currently active `InteractiveShell`
