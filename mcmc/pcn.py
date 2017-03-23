@@ -9,15 +9,17 @@ logger = logging.getLogger(__name__)
 import scipy
 
 class PCNProposal(object):
-    def __init__(self, beta, covariance_matrix):
+
+    def __init__(self, beta, covariance_matrix, prior_mean=None):
         self.beta = beta
         #(u, s, v) = np.linalg.svd(covariance_matrix)
         #self.__dot_with_xi = np.sqrt(s)[:, None] * v
-        self.__dot_with_xi = scipy.linalg.sqrtm(covariance_matrix)
+        self.__prior_mean__ = np.zeros(covariance_matrix.shape[0]) if prior_mean is None else prior_mean
+        self.__dot_with_xi__ = np.real_if_close(scipy.linalg.sqrtm(covariance_matrix))
 
     def __call__(self, current):
-        xi = np.dot(self.__dot_with_xi, np.random.normal(size=current.shape))
-        new = np.sqrt(1-self.beta**2)*current + self.beta*xi
+        xi = np.dot(self.__dot_with_xi__, np.random.normal(size=current.shape))
+        new = self.__prior_mean__ + np.sqrt(1-self.beta**2)*(current - self.__prior_mean__) + self.beta*xi
         return new
 
 class InfinityMalaProposal(object):
@@ -43,8 +45,8 @@ class InfinityMalaProposal(object):
         return self.__A_theta.dot(current) + self.__B_theta.dot(xi + self.__sqrtm.dot(h))
 
 
-def proposal(beta, covariance_matrix):
-    return PCNProposal(beta, covariance_matrix)
+def proposal(beta, covariance_matrix, prior_mean=None):
+    return PCNProposal(beta, covariance_matrix, prior_mean)
 
 
 def adapt_function(adapt_frequency, min_accept, max_accept, factor, verbosity=1):
