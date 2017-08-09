@@ -1,7 +1,7 @@
 import numpy as np
-from utilities import as_single_number
-import progress
-
+from .utilities import as_single_number
+from . import progress
+from six.moves import *
 
 class GibbsProposal(object):
     def __init__(self, proposal, indices):
@@ -30,7 +30,7 @@ def gibbs(iterations, proposals, log_likelihood, log_prior, init_theta, progress
 
     propose_ix = 0
     proposal_indices = np.empty(iterations, dtype=np.int)
-    for i in xrange(iterations):
+    for i in range(iterations):
         proposal = proposals[propose_ix]
 
         new_theta = cur_theta.copy()

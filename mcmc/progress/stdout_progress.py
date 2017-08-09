@@ -1,10 +1,10 @@
-from __future__ import print_function
+from six.moves import *
 import time
 import sys
 import logging
-import base
+from . import base
 
-from time_utils import pretty_time_delta
+from .time_utils import pretty_time_delta
 logger = logging.getLogger(__name__)
 
 class PrintProgress(base.ProgressBase):
@@ -24,7 +24,7 @@ class PrintProgress(base.ProgressBase):
         print('Iter {}: {}'.format(iter, error))
         sys.stdout.flush()
 
-    def update(self, iteration, acceptances):
+    def update(self, iteration, acceptances, **extra_fields):
         if self.verbosity == 1 and iteration % self.update_frequency == 0 and iteration > 0:
             update_frequency = self.update_frequency
 

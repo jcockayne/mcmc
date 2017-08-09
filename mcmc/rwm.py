@@ -1,7 +1,7 @@
 import numpy as np
-from utilities import as_single_number
-import progress
-
+from .utilities import as_single_number
+from . import progress
+from six.moves import *
 
 def mala_proposal(grad_pi, sigma):
     def __proposal(theta):
@@ -50,7 +50,7 @@ def rwm(iterations, propose, log_likelihood, log_prior, init_theta, progress_obj
 
     progress_object.initialise(iterations)
 
-    for i in xrange(iterations):
+    for i in range(iterations):
         new_theta = propose(cur_theta)
         new_log_prior = as_single_number(log_prior(new_theta))
 

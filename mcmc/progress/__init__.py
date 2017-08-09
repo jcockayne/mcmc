@@ -1,4 +1,4 @@
-import jupyter_progress, stdout_progress, null_progress, base
+from . import jupyter_progress, stdout_progress, null_progress, base
 
 verbose = True
 PROGRESS_NOTEBOOK = 'notebook'

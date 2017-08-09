@@ -1,12 +1,13 @@
 from __future__ import print_function
 import numpy as np
 
-import progress
-from utilities import as_single_number
-import storage as st
+from . import progress
+from .utilities import as_single_number
+from . import storage as st
 import logging
 logger = logging.getLogger(__name__)
 import scipy
+from six.moves import *
 
 class PCNProposal(object):
 
@@ -82,10 +83,11 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
     cur_phi = as_single_number(phi(cur_kappa))
 
     progress_object.initialise(iterations)
+    progress_object.add_field('beta', 'Beta', '{:.4e}')
 
-    for i in xrange(iterations):
+    for i in range(iterations):
         if adapt_frequency is not None and i > 0 and i % adapt_frequency == 0:
-            propose = adapt_function(propose, storage, acceptances)
+            propose = adapt_function(propose, storage, acceptances[:i])
         try:
             new_kappa = propose(cur_kappa)
             new_phi = as_single_number(phi(new_kappa))
@@ -107,7 +109,7 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
         storage.add_sample(cur_kappa.ravel())
         acceptances[i] = accept
 
-        progress_object.update(i, acceptances[:i])
+        progress_object.update(i, acceptances[:i], beta=propose.beta)
     progress_object.update(iterations, acceptances)
     if return_array:
         return storage.array, acceptances

@@ -13,5 +13,9 @@ class ProgressBase(object):
         pass
 
     @abc.abstractmethod
-    def update(self, iteration, acceptances):
+    def update(self, iteration, acceptances, **extra_fields):
+        pass
+
+    @abc.abstractmethod
+    def add_field(self, name, display_name, format_string):
         pass

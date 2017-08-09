@@ -2,9 +2,10 @@ import time
 import ipywidgets
 from IPython.display import display
 import numpy as np
-from ring_buffer import RingBuffer
-from time_utils import pretty_time_delta
-import base
+from .ring_buffer import RingBuffer
+from .time_utils import pretty_time_delta
+from . import base
+from six.moves import *
 
 update_frequency_seconds = 0.1
 max_accept_lag = 1000
@@ -24,6 +25,7 @@ class JupyterProgress(base.ProgressBase):
         self.__text_field__ = ipywidgets.HTML()
         self.__error_field__ = None
         self.__error_label__ = None
+        self.__extra_fields__ = {}
 
     def initialise(self, n_iter):
         self.start_time = self.last_update_time = time.time()
@@ -43,7 +45,7 @@ class JupyterProgress(base.ProgressBase):
             self.__error_field__.value += 'Iteration {}: {}\n'.format(iter, error)
         self.__total_errors__ += 1
 
-    def update(self, iteration, acceptances):
+    def update(self, iteration, acceptances, **extra_fields):
         if self.n_iter is None:
             raise Exception('First pass in the number of iterations!')
 
@@ -70,11 +72,14 @@ class JupyterProgress(base.ProgressBase):
 
             eta = (self.n_iter - iteration) * time_per_iter
 
-            html = self.__get_text_field__(iteration, self.n_iter, delta_accept, tot_accept, time_per_iter, eta)
+            html = self.__get_text_field__(iteration, self.n_iter, delta_accept, tot_accept, time_per_iter, eta, **extra_fields)
             self.__text_field__.value = html
 
             self.last_update_time = now
             self.last_update_iteration = iteration
+
+    def add_field(self, name, display_name, format_string):
+        self.__extra_fields__[name] = {'display_name': display_name, 'format_string': format_string}
 
     def __initialise_errors__(self):
         if self.verbosity > 0:
@@ -83,7 +88,7 @@ class JupyterProgress(base.ProgressBase):
             display(self.__error_label__)
             display(self.__error_field__)
 
-    def __get_text_field__(self, iteration, n_iter, delta_accept, total_accept, time_per_iter, eta):
+    def __get_text_field__(self, iteration, n_iter, delta_accept, total_accept, time_per_iter, eta, **extra_fields):
         template = """
                 <div class="progress">
                   <div class="progress-bar" role="progressbar" aria-valuenow="{}"
@@ -116,8 +121,18 @@ class JupyterProgress(base.ProgressBase):
                                 <td>Errors</td>
                                 <td>{}</td>
                         </tr>
+                        {extra_fields}
                 </table>
         """
+        extra_fields_template = """<tr><td>{}</td><td>{}</td>"""
+        formatted_extra_fields = []
+        for k, v in extra_fields.items():
+            params = self.__extra_fields__[k]
+            display_name = params['display_name']
+            format_string = params['format_string']
+            field = extra_fields_template.format(display_name, format_string.format(v))
+            formatted_extra_fields.append(field)
+
         return template.format(iteration,
                                n_iter,
                                iteration*100./n_iter,
@@ -128,4 +143,5 @@ class JupyterProgress(base.ProgressBase):
                                total_accept,
                                time_per_iter,
                                pretty_time_delta(eta),
-                               self.__total_errors__)
+                               self.__total_errors__,
+                               extra_fields='\n'.join(formatted_extra_fields))

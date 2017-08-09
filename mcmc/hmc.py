@@ -1,6 +1,6 @@
 import numpy as np
-import progress
-
+from . import progress
+from six.moves import *
 
 def hmc(iterations, log_pi, epsilon, L, q_0, grad_log_pi=None, progress_object=None):
     progress_object = progress.factory(progress_object)
@@ -21,7 +21,7 @@ def hmc(iterations, log_pi, epsilon, L, q_0, grad_log_pi=None, progress_object=N
 
     progress_object.initialise(iterations)
 
-    for i in xrange(iterations):
+    for i in range(iterations):
         p = np.random.normal(size=q.shape[0])
         cur_p = p
         # half step
