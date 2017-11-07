@@ -12,16 +12,46 @@ from six.moves import *
 class PCNProposal(object):
 
     def __init__(self, beta, covariance_matrix, prior_mean=None):
-        self.beta = beta
+        self.__beta__ = beta
+        self.__beta2__ = beta2
         #(u, s, v) = np.linalg.svd(covariance_matrix)
         #self.__dot_with_xi = np.sqrt(s)[:, None] * v
         self.__prior_mean__ = np.zeros(covariance_matrix.shape[0]) if prior_mean is None else prior_mean
         self.__dot_with_xi__ = np.real_if_close(scipy.linalg.sqrtm(covariance_matrix))
 
+    @property
+    def beta(self):
+        return self.__beta__
+
+    @beta.setter
+    def beta(self, value):
+        self.__beta__ = value
+        self.__beta2mult__ = sqrt(1-value*value)
+
     def __call__(self, current):
         xi = np.dot(self.__dot_with_xi__, np.random.normal(size=current.shape))
-        new = self.__prior_mean__ + np.sqrt(1-self.beta**2)*(current - self.__prior_mean__) + self.beta*xi
+        new = self.__prior_mean__ + np.sqrt(1-self.__beta2__)*(current - self.__prior_mean__) + self.__beta__*xi
         return new
+
+class SqrtPCNProposal(object):
+    def __init__(self, beta, sparse_sqrt_cov):
+        self.__beta__ = beta
+        self.__beta2mult__ = np.sqrt(1-beta*beta)
+        self.__dot_with_xi__ = sparse_sqrt_cov
+
+    @property
+    def beta(self):
+        return self.__beta__
+
+    @beta.setter
+    def beta(self, value):
+        self.__beta__ = value
+        self.__beta2mult__ = np.sqrt(1-value*value)
+
+    def __call__(self, current):
+        xi = self.__dot_with_xi__.dot(np.random.normal(size=current.shape))
+        return self.__beta2mult__*current + self.__beta__*xi
+
 
 class InfinityMalaProposal(object):
     def __init__(self, grad_phi, covariance_matrix, dt):
