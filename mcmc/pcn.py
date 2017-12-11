@@ -34,9 +34,10 @@ class PCNProposal(object):
         return new
 
 class SqrtPCNProposal(object):
-    def __init__(self, beta, sparse_sqrt_cov):
+    def __init__(self, beta, sparse_sqrt_cov, prior_mean=None):
         self.__beta__ = beta
         self.__beta2mult__ = np.sqrt(1-beta*beta)
+        self.__prior_mean__ = prior_mean if prior_mean is not None else np.zeros(sparse_sqrt_cov.shape[0])
         self.__dot_with_xi__ = sparse_sqrt_cov
 
     @property
@@ -50,7 +51,7 @@ class SqrtPCNProposal(object):
 
     def __call__(self, current):
         xi = self.__dot_with_xi__.dot(np.random.normal(size=current.shape))
-        return self.__beta2mult__*current + self.__beta__*xi
+        return self.__prior_mean__ + self.__beta2mult__*(current - self.__prior_mean__) + self.__beta__*xi
 
 
 class InfinityMalaProposal(object):
