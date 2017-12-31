@@ -137,7 +137,7 @@ def pCN(iterations, propose, phi, kappa_0, adapt_frequency=None, adapt_function=
             cur_kappa = new_kappa
             cur_phi = new_phi
 
-        storage.add_sample(cur_kappa.ravel())
+        storage.add_sample(cur_kappa.ravel(), -cur_phi)
         acceptances[i] = accept
 
         progress_object.update(i, acceptances[:i], beta=propose.beta)

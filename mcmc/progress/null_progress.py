@@ -8,5 +8,8 @@ class NullProgress(object):
     def report_error(self, iter, error):
         pass
 
-    def update(self, iteration, acceptances):
+    def update(self, iteration, acceptances, **extra_fields):
         pass
+
+    def add_field(self, name, display_name, format_string):
+    	pass

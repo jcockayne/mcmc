@@ -28,7 +28,7 @@ class DiskBackedStorage(object):
 
         self.__dest_table__ = self.__f__.create_earray('/', 'samples', tables.Float64Atom(), (0, store_shape[1]))
 
-    def add_sample(self, value):
+    def add_sample(self, value, log_likelihood):
         self.__array__[self.__current_index__, :] = value
 
         self.__current_index__ += 1
