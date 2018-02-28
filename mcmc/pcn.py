@@ -13,7 +13,7 @@ class PCNProposal(object):
 
     def __init__(self, beta, covariance_matrix, prior_mean=None):
         self.__beta__ = beta
-        self.__beta2__ = beta2
+        self.__beta2mult__ = np.sqrt(1-beta*beta)
         #(u, s, v) = np.linalg.svd(covariance_matrix)
         #self.__dot_with_xi = np.sqrt(s)[:, None] * v
         self.__prior_mean__ = np.zeros(covariance_matrix.shape[0]) if prior_mean is None else prior_mean
@@ -26,11 +26,11 @@ class PCNProposal(object):
     @beta.setter
     def beta(self, value):
         self.__beta__ = value
-        self.__beta2mult__ = sqrt(1-value*value)
+        self.__beta2mult__ = np.sqrt(1-value*value)
 
     def __call__(self, current):
         xi = np.dot(self.__dot_with_xi__, np.random.normal(size=current.shape))
-        new = self.__prior_mean__ + np.sqrt(1-self.__beta2__)*(current - self.__prior_mean__) + self.__beta__*xi
+        new = self.__prior_mean__ + self.__beta2mult__*(current - self.__prior_mean__) + self.__beta__*xi
         return new
 
 class SqrtPCNProposal(object):
